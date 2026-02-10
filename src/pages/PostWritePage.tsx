@@ -1,35 +1,41 @@
-// src/pages/PostWritePage.tsx
-
-/**
- * 글쓰기 페이지 (임시)
- *
- * Day 1 요구사항: POST-001
- * "로그인한 사용자는 새 게시글을 작성할 수 있다"
- *
- * 실제 글쓰기 기능은 Day 6에서 구현합니다.
- * 지금은 보호된 라우트 테스트용입니다.
- */
-
+import { useCallback } from "react";
+import { useNavigate } from "react-router-dom";
 import { useAuthStore } from "@/store/authStore";
+import { useCreatePost } from "@/hooks/mutations";
+import PostForm from "@/components/PostForm";
+import type { PostInput } from "@/types";
 
 function PostWritePage() {
-  const user = useAuthStore((state) => state.user);
+    const user = useAuthStore((state) => state.user);
+    const navigate = useNavigate();
+    const createPostMutation = useCreatePost();
 
-  return (
-    <div className="max-w-2xl mx-auto">
-      <h1 className="text-2xl font-bold text-gray-900 mb-6">새 글 작성</h1>
+    const handleSubmit = useCallback(
+        async (data: PostInput) => {
+            if (!user) return;
 
-      <div className="bg-white rounded-lg shadow p-6">
-        <p className="text-gray-600 mb-4">
-          ✅ 이 페이지는 로그인한 사용자만 접근할 수 있습니다.
-        </p>
-        <p className="text-sm text-gray-500">현재 로그인: {user?.email}</p>
-        <p className="text-sm text-gray-400 mt-4">
-          실제 글쓰기 폼은 Day 6에서 구현합니다.
-        </p>
-      </div>
-    </div>
-  );
+            createPostMutation.mutate(
+                { input: data, user },
+                {
+                    onSuccess: (postId) => {
+                        navigate(`/posts/${postId}`);
+                    },
+                },
+            );
+        },
+        [user, createPostMutation, navigate],
+    );
+
+    return (
+        <div className="max-w-full mx-auto">
+            <h1 className="text-2xl font-bold mb-6">새 글 작성</h1>
+
+            <PostForm
+                onSubmit={handleSubmit}
+                isLoading={createPostMutation.isPending}
+            />
+        </div>
+    );
 }
 
 export default PostWritePage;

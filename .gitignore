@@ -12,6 +12,14 @@ dist
 dist-ssr
 *.local
 
+# 환경 변수 (민감한 정보)
+.env
+.env.local
+
+docs
+*copy*
+
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
@@ -22,26 +30,3 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
-
-# 환경 변수 (민감한 정보)
-.env
-.env.local
-.env.*.local
-
-# 의존성
-node_modules
-
-# 빌드 결과물
-dist
-
-# 에디터
-.vscode
-.idea
-
-# 시스템 파일
-.DS_Store
-Thumbs.db
-
-# 로그
-*.log
-npm-debug.log*

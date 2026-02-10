@@ -10,14 +10,14 @@
  */
 
 import {
-  createUserWithEmailAndPassword,
-  signInWithEmailAndPassword,
-  signOut,
-  onAuthStateChanged,
-  sendPasswordResetEmail,
-  sendEmailVerification,
-  signInWithPopup,
-  GoogleAuthProvider,
+    createUserWithEmailAndPassword,
+    signInWithEmailAndPassword,
+    signOut,
+    onAuthStateChanged,
+    sendPasswordResetEmail,
+    sendEmailVerification,
+    signInWithPopup,
+    GoogleAuthProvider,
 } from "firebase/auth";
 import type { User as FirebaseUser, AuthError } from "firebase/auth";
 import { auth } from "./firebase";
@@ -47,8 +47,9 @@ const googleProvider = new GoogleAuthProvider();
  * @returns 로그인한 사용자 정보
  */
 export async function signInWithGoogle(): Promise<User> {
-  const result = await signInWithPopup(auth, googleProvider);
-  return formatUser(result.user);
+    const result = await signInWithPopup(auth, googleProvider);
+    console.log("service auth signInWithGoogle result --- ", result);
+    return formatUser(result.user);
 }
 
 /**
@@ -58,12 +59,12 @@ export async function signInWithGoogle(): Promise<User> {
  * Day 1 데이터 모델의 User 인터페이스에 맞춰 변환합니다.
  */
 export function formatUser(firebaseUser: FirebaseUser): User {
-  return {
-    uid: firebaseUser.uid,
-    email: firebaseUser.email || "",
-    displayName: firebaseUser.displayName,
-    photoURL: firebaseUser.photoURL,
-  };
+    return {
+        uid: firebaseUser.uid,
+        email: firebaseUser.email || "",
+        displayName: firebaseUser.displayName,
+        photoURL: firebaseUser.photoURL,
+    };
 }
 
 /**
@@ -78,12 +79,12 @@ export function formatUser(firebaseUser: FirebaseUser): User {
  * @throws 이미 가입된 이메일, 약한 비밀번호 등의 에러
  */
 export async function signUp(email: string, password: string): Promise<User> {
-  const userCredential = await createUserWithEmailAndPassword(
-    auth,
-    email,
-    password,
-  );
-  return formatUser(userCredential.user);
+    const userCredential = await createUserWithEmailAndPassword(
+        auth,
+        email,
+        password,
+    );
+    return formatUser(userCredential.user);
 }
 
 /**
@@ -98,12 +99,12 @@ export async function signUp(email: string, password: string): Promise<User> {
  * @throws 존재하지 않는 사용자, 잘못된 비밀번호 등의 에러
  */
 export async function signIn(email: string, password: string): Promise<User> {
-  const userCredential = await signInWithEmailAndPassword(
-    auth,
-    email,
-    password,
-  );
-  return formatUser(userCredential.user);
+    const userCredential = await signInWithEmailAndPassword(
+        auth,
+        email,
+        password,
+    );
+    return formatUser(userCredential.user);
 }
 
 /**
@@ -112,7 +113,7 @@ export async function signIn(email: string, password: string): Promise<User> {
  * Day 1 요구사항: AUTH-004
  */
 export async function logout(): Promise<void> {
-  await signOut(auth);
+    await signOut(auth);
 }
 
 /**
@@ -122,7 +123,7 @@ export async function logout(): Promise<void> {
  * @throws 존재하지 않는 이메일 등의 에러
  */
 export async function resetPassword(email: string): Promise<void> {
-  await sendPasswordResetEmail(auth, email);
+    await sendPasswordResetEmail(auth, email);
 }
 
 /**
@@ -132,11 +133,11 @@ export async function resetPassword(email: string): Promise<void> {
  * @throws 로그인된 사용자가 없는 경우 에러
  */
 export async function verifyEmail(): Promise<void> {
-  if (auth.currentUser) {
-    await sendEmailVerification(auth.currentUser);
-  } else {
-    throw new Error("로그인된 사용자가 없습니다.");
-  }
+    if (auth.currentUser) {
+        await sendEmailVerification(auth.currentUser);
+    } else {
+        throw new Error("로그인된 사용자가 없습니다.");
+    }
 }
 
 /**
@@ -151,15 +152,15 @@ export async function verifyEmail(): Promise<void> {
  * @returns 구독 해제 함수 (cleanup)
  */
 export function subscribeToAuthState(
-  callback: (user: User | null) => void,
+    callback: (user: User | null) => void,
 ): () => void {
-  return onAuthStateChanged(auth, (firebaseUser) => {
-    if (firebaseUser) {
-      callback(formatUser(firebaseUser));
-    } else {
-      callback(null);
-    }
-  });
+    return onAuthStateChanged(auth, (firebaseUser) => {
+        if (firebaseUser) {
+            callback(formatUser(firebaseUser));
+        } else {
+            callback(null);
+        }
+    });
 }
 
 /**
@@ -171,37 +172,39 @@ export function subscribeToAuthState(
  * @returns 사용자 친화적인 한글 에러 메시지
  */
 export function getAuthErrorMessage(error: unknown): string {
-  const errorMessages: Record<string, string> = {
-    // 회원가입 에러
-    "auth/email-already-in-use": "이미 사용 중인 이메일입니다.",
-    "auth/invalid-email": "올바른 이메일 형식을 입력해주세요.",
-    "auth/weak-password": "비밀번호는 6자 이상이어야 합니다.",
+    const errorMessages: Record<string, string> = {
+        // 회원가입 에러
+        "auth/email-already-in-use": "이미 사용 중인 이메일입니다.",
+        "auth/invalid-email": "올바른 이메일 형식을 입력해주세요.",
+        "auth/weak-password": "비밀번호는 6자 이상이어야 합니다.",
 
-    // 로그인 에러
-    // 참고: 최신 Firebase는 보안상 user-not-found, wrong-password 대신
-    // invalid-credential을 주로 반환합니다.
-    "auth/user-not-found": "등록되지 않은 이메일입니다.",
-    "auth/wrong-password": "비밀번호가 일치하지 않습니다.",
-    "auth/invalid-credential": "이메일 또는 비밀번호가 올바르지 않습니다.",
-    "auth/too-many-requests":
-      "너무 많은 시도가 있었습니다. 잠시 후 다시 시도해주세요.",
+        // 로그인 에러
+        // 참고: 최신 Firebase는 보안상 user-not-found, wrong-password 대신
+        // invalid-credential을 주로 반환합니다.
+        "auth/user-not-found": "등록되지 않은 이메일입니다.",
+        "auth/wrong-password": "비밀번호가 일치하지 않습니다.",
+        "auth/invalid-credential": "이메일 또는 비밀번호가 올바르지 않습니다.",
+        "auth/too-many-requests":
+            "너무 많은 시도가 있었습니다. 잠시 후 다시 시도해주세요.",
 
-    // 일반 에러
-    "auth/network-request-failed": "네트워크 연결을 확인해주세요.",
-    "auth/internal-error":
-      "서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.",
-  };
+        // 일반 에러
+        "auth/network-request-failed": "네트워크 연결을 확인해주세요.",
+        "auth/internal-error":
+            "서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.",
+    };
 
-  // 문자열로 직접 전달된 경우 (에러 코드)
-  if (typeof error === "string") {
-    return errorMessages[error] || "알 수 없는 오류가 발생했습니다.";
-  }
+    // 문자열로 직접 전달된 경우 (에러 코드)
+    if (typeof error === "string") {
+        return errorMessages[error] || "알 수 없는 오류가 발생했습니다.";
+    }
 
-  // AuthError 타입인지 확인 후 에러 코드 추출
-  if (error && typeof error === "object" && "code" in error) {
-    const authError = error as AuthError;
-    return errorMessages[authError.code] || "알 수 없는 오류가 발생했습니다.";
-  }
+    // AuthError 타입인지 확인 후 에러 코드 추출
+    if (error && typeof error === "object" && "code" in error) {
+        const authError = error as AuthError;
+        return (
+            errorMessages[authError.code] || "알 수 없는 오류가 발생했습니다."
+        );
+    }
 
-  return "알 수 없는 오류가 발생했습니다.";
+    return "알 수 없는 오류가 발생했습니다.";
 }
